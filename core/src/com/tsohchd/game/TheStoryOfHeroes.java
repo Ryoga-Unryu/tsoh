@@ -57,10 +57,52 @@ public class TheStoryOfHeroes extends ApplicationAdapter {
         this.button = new TextButton("Button1", this.buttonStyle);
         final TextButton theButton = this.button;
         this.button.addListener(new ClickListener() {
+        	private boolean pressed = false;
+        	private float borderX = 200;
+        	private float currentX = 0;
+        	private float borderY = 200;
+        	private float currentY = 0;
+        	
         	@Override
         	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
         		System.out.println("Pressed Button 1!");
+        		this.pressed = true;
         		return super.touchDown(event, x, y, pointer, button);
+        	}
+        	
+        	@Override
+        	public void touchDragged(InputEvent event, float x, float y, int pointer) {
+        		
+    			x = x-(theButton.getWidth()/2.0f);
+    			
+    			if(this.currentX + x > this.borderX) {
+    				x = 0;
+    				this.currentX = this.borderX;
+    			} else if(this.currentX + x < 0) {
+    				x = 0;
+    				this.currentX = 0;
+    			} else {
+        			this.currentX += x;
+    			}
+    			
+    			y = y-(theButton.getHeight()/2.0f);
+    			
+    			if(this.currentY + y > this.borderY) {
+    				y = 0;
+    				this.currentY = this.borderY;
+    			} else if(this.currentY + y < 0) {
+    				y = 0;
+    				this.currentY = 0;
+    			} else {
+        			this.currentY += y;
+    			}
+
+    			System.out.println("Current: (" + this.currentX + "," + this.currentY + ")");
+        		
+        		if(this.pressed) {
+        			theButton.moveBy(x, y);
+        		}
+        		super.touchDragged(event, x, y, pointer);
         	}
         	
         	@Override
@@ -72,17 +114,33 @@ public class TheStoryOfHeroes extends ApplicationAdapter {
         		if(buttonRec.overlaps(mouseRec)) {
         			theButton.remove();
         		}
+        		this.pressed = false;
         		super.touchUp(event, x, y, pointer, button);
         	}
         });
         this.button2 = new TextButton("Button2", this.buttonStyle);
         final TextButton theButton2 = this.button2;
         this.button2.addListener(new ClickListener() {
+        	private boolean pressed = false;
+        	private boolean moved = false;
+        	
         	@Override
         	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
         		System.out.println("Pressed Button 2!");
+        		this.pressed = true;
         		return super.touchDown(event, x, y, pointer, button);
         	}
+        	
+        	@Override
+        	public void touchDragged(InputEvent event, float x, float y, int pointer) {
+        		if(this.pressed) {
+        			theButton2.moveBy(x-(theButton2.getWidth()/2.0f), y-(theButton2.getHeight()/2.0f));
+        			this.moved = true;
+        		}
+        		
+        		super.touchDragged(event, x, y, pointer);
+        	}
+        	
         	
         	@Override
         	public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
@@ -90,9 +148,11 @@ public class TheStoryOfHeroes extends ApplicationAdapter {
         		Rectangle mouseRec = new Rectangle(x, y, 0, 0);
         		System.out.println("Released Button 2! Is on button: " + buttonRec.overlaps(mouseRec) + " (" + buttonRec + ") (" + mouseRec + ")");
         		
-        		if(buttonRec.overlaps(mouseRec)) {
+        		if(buttonRec.overlaps(mouseRec) && !this.moved) {
         			theButton2.remove();
         		}
+        		this.pressed = false;
+        		this.moved = false;
         		super.touchUp(event, x, y, pointer, button);
         	}
         });
@@ -100,6 +160,9 @@ public class TheStoryOfHeroes extends ApplicationAdapter {
         this.button.setPosition(50, 50);
         this.stage.addActor(this.button);
         this.stage.addActor(this.button2);
+        System.out.println("Button1 z-index: " + this.button.getZIndex());
+        System.out.println("Button2 z-index: " + this.button2.getZIndex());
+        this.button.setZIndex(2);
 	}
 
 	@Override
